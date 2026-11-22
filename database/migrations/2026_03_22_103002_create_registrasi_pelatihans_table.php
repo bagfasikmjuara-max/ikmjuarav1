@@ -19,39 +19,45 @@ return new class extends Migration
             
             // Data Diri
             $table->string('nama_lengkap');
-            $table->string('nik', 16); // Tetap 16 digit
-            $table->string('nib', 16); // Tetap 16 digit (mengakomodasi format lama/baru)
+            $table->string('nik', 16);
+            $table->string('nib', 255)->nullable();
             $table->string('email');
             $table->string('whatsapp');
-            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan']);
-            $table->date('tanggal_lahir')->nullable(); // Dipertahankan (nullable karena tidak ada di form depan)
-            $table->string('foto_ktp'); // URL Cloudinary
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('foto_ktp')->nullable();
+            $table->json('foto_produk')->nullable();
 
             // Informasi Usaha
             $table->string('nama_usaha');
-            $table->string('kelurahan');
-            $table->string('kecamatan');
+            $table->string('produk_diproduksi')->nullable();
+            $table->text('alamat_usaha')->nullable();
+            $table->string('kelurahan')->nullable();
+            $table->string('kecamatan')->nullable();
             $table->string('kota')->default('Madiun');
-            $table->string('jenis_usaha');
-            $table->year('tahun_mulai');
-            $table->string('skala_usaha');
+            $table->string('jenis_usaha')->nullable();
+            $table->string('tahun_mulai', 10)->nullable();
+            $table->string('skala_usaha')->nullable();
 
             // Omzet & Tantangan
-            $table->string('omzet_bulanan');
-            $table->string('stabilitas_omzet');
-            $table->json('tantangan_usaha')->nullable(); // Optimasi: nullable agar tidak error jika checkbox kosong
-            $table->json('media_penjualan')->nullable(); // Optimasi: nullable agar tidak error jika checkbox kosong
+            $table->string('omzet_bulanan')->nullable();
+            $table->string('stabilitas_omzet')->nullable();
+            $table->json('tantangan_usaha')->nullable();
+            $table->json('media_penjualan')->nullable();
+            $table->json('cakupan_pemasaran')->nullable();
             $table->integer('karyawan_tetap')->default(0);
             $table->integer('karyawan_tidak_tetap')->default(0);
-            $table->string('sistem_usaha');
+            $table->string('sistem_usaha')->nullable();
 
             // Insight & Digital
-            $table->string('level_digital');
-            $table->string('pernah_pelatihan')->nullable(); // Dipertahankan & dibuat nullable (tidak ada di form depan)
+            $table->string('level_digital')->nullable();
+            $table->string('pernah_pelatihan')->nullable();
             $table->text('harapan_pelatihan')->nullable();
-            $table->text('target_6_bulan')->nullable(); // Dipertahankan (nullable karena tidak ada di form depan)
+            $table->text('target_6_bulan')->nullable();
+            $table->boolean('is_lolos')->default(false);
 
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -60,7 +66,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // PERBAIKAN: Nama tabel harus sama dengan yang dibuat di up()
         Schema::dropIfExists('registrasi_pelatihan');
     }
 };

@@ -9,39 +9,49 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-public function up(): void
-{
-    // Kita gunakan create jika belum ada, atau table jika ingin menambah kolom
-    Schema::dropIfExists('pelaku_usaha'); // Hapus yang lama agar bersih
-    Schema::create('pelaku_usaha', function (Blueprint $table) {
-        $table->id();
-        $table->string('nib', 13);
-        $table->string('nik', 16);
-        $table->string('skala_usaha');
-        $table->string('jenis_perusahaan');
-        $table->string('nama_perusahaan');
-        $table->string('nama_proyek');
-        $table->string('nama_pemilik');
-        $table->text('alamat_usaha');
-        $table->string('kecamatan');
-        $table->string('kelurahan');
-        $table->char('kbli', 5);
-        $table->text('uraian_kbli');
-        $table->string('tingkat_risiko');
-        $table->bigInteger('investasi'); // Pastikan kolom ini ada
-        $table->integer('tenaga_kerja');
-        $table->string('no_telp');
-        $table->string('email');
-        $table->date('tgl_terbit');
-        $table->timestamps();
-    });
-}
+    public function up(): void
+    {
+        Schema::dropIfExists('pelaku_usaha');
+        Schema::create('pelaku_usaha', function (Blueprint $table) {
+            $table->id();
+            $table->string('nib', 13)->nullable();
+            $table->string('nik', 16)->nullable();
+            $table->string('skala_usaha')->nullable();
+            $table->string('jenis_perusahaan')->nullable();
+            $table->string('nama_perusahaan')->nullable();
+            $table->string('nama_proyek')->nullable();
+            $table->string('nama_pemilik')->nullable();
+            $table->text('alamat_usaha')->nullable();
+            $table->string('kecamatan')->nullable();
+            $table->string('kelurahan', 100)->nullable();
+            $table->char('kbli', 5)->nullable();
+            $table->text('uraian_kbli')->nullable();
+            $table->string('tingkat_risiko')->nullable();
+            $table->bigInteger('investasi')->default(0);
+            $table->integer('tenaga_kerja')->default(0);
+            $table->string('no_telp')->nullable();
+            $table->string('email')->nullable();
+            $table->date('tgl_terbit')->nullable();
+            $table->string('nama_usaha')->nullable();
+            $table->string('pemilik')->nullable();
+            $table->text('alamat')->nullable();
+            $table->decimal('latitude', 10, 8)->nullable();
+            $table->decimal('longitude', 11, 8)->nullable();
+            $table->string('kategori', 100)->nullable();
+            $table->string('status')->default('Aktif');
+            $table->string('sertifikat_halal')->nullable();
+            $table->string('bpom')->nullable();
+            $table->string('cppob')->nullable();
+            $table->string('sni')->nullable();
+            $table->timestamps();
+        });
+    }
 
     /**
      * Reverse the migrations.
      */
     public function down(): void
     {
-        //
+        Schema::dropIfExists('pelaku_usaha');
     }
 };

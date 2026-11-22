@@ -13,6 +13,16 @@ class Konsultasi extends Model
     protected $fillable = [
         'nama_ikm', 
         'jenis_usaha', 
-        'keluhan'
+        'keluhan',
+        'email',
+        'nik',
+        'sumber',
+        'jawaban',
+        'status'
     ];
+
+    public function messages()
+    {
+        return $this->hasMany(KonsultasiPesan::class, 'konsultasi_id')->orderBy('created_at', 'asc');
+    }
 }

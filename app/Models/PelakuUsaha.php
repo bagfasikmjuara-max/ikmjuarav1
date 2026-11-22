@@ -10,5 +10,8 @@ class PelakuUsaha extends Model
     // Tambahkan baris ini:
     protected $table = 'pelaku_usaha'; 
     
-    protected $guarded = ['id'];
+// TAMBAHKAN INI: Karena tabel Anda tidak punya kolom updated_at
+    public $timestamps = false; 
+
+    protected $guarded = [];
 }

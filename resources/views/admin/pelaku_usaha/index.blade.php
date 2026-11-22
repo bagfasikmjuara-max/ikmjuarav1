@@ -70,6 +70,10 @@
             <h1 class="text-xl font-bold text-indigo-900">Database Pelaku Usaha Kota Madiun</h1>
             <p class="text-sm text-slate-500">Manajemen data investasi dan perizinan</p>
         </div>
+        @php
+            $pendingNewCount = \App\Models\UsulanPerubahan::where('status_usulan', 'pending')->where('tipe_usulan', 'baru')->count();
+            $pendingChangeCount = \App\Models\UsulanPerubahan::where('status_usulan', 'pending')->where('tipe_usulan', 'perubahan')->count();
+        @endphp
         <div class="flex gap-3">
             <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center transition shadow-sm">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -99,7 +103,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-xs font-bold text-slate-500 uppercase">Total Investasi</p>
-                <h3 class="text-xl font-black text-slate-800">
+                <h3 id="stat-investasi" class="text-xl font-black text-slate-800">
                     Rp {{ number_format($totalinvestasi ?? 0, 0, ',', '.') }}
                 </h3>
             </div>
@@ -113,7 +117,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-xs font-bold text-slate-500 uppercase">Tenaga Kerja</p>
-                <h3 class="text-xl font-black text-slate-800">
+                <h3 id="stat-tenaga-kerja" class="text-xl font-black text-slate-800">
                     {{ number_format($totalTenagaKerja ?? 0, 0, ',', '.') }}
                 </h3>
             </div>
@@ -127,7 +131,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-xs font-bold text-slate-500 uppercase">Pelaku Usaha (NIB Unik)</p>
-                <h3 class="text-xl font-black text-slate-800">
+                <h3 id="stat-pelaku-usaha" class="text-xl font-black text-slate-800">
                     {{ number_format($totalPelakuUnik ?? 0, 0, ',', '.') }}
                 </h3>
             </div>
@@ -141,7 +145,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-xs font-bold text-slate-500 uppercase">Total Proyek</p>
-                <h3 class="text-xl font-black text-slate-800">
+                <h3 id="stat-total-proyek" class="text-xl font-black text-slate-800">
                     {{ number_format($totalSemuaData ?? 0, 0, ',', '.') }}
                 </h3>
             </div>
@@ -152,11 +156,11 @@
         <div class="bg-white p-4 rounded-xl shadow-sm mb-6 border flex flex-wrap gap-4 items-end">
             <div class="flex-1 min-w-[300px]">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Cari Data</label>
-                <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Masukkan NIB atau Nama Perusahaan..." class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
+                <input type="text" id="searchInput" onkeyup="filterTable(true)" placeholder="Masukkan NIB atau Nama Perusahaan..." class="w-full mt-1 px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50">
             </div>
             <div class="w-48">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Kecamatan</label>
-                <select id="filterKecamatan" onchange="filterTable()" class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50">
+                <select id="filterKecamatan" onchange="filterTable(true)" class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50">
                     <option value="">Semua</option>
                     <option value="Kartoharjo">Kartoharjo</option>
                     <option value="Manguharjo">Manguharjo</option>
@@ -165,7 +169,7 @@
             </div>
             <div class="w-48">
                 <label class="text-xs font-bold text-slate-500 uppercase tracking-wider">Tingkat Risiko</label>
-                <select id="filterRisiko" onchange="filterTable()" class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50">
+                <select id="filterRisiko" onchange="filterTable(true)" class="w-full mt-1 px-3 py-2 border rounded-lg bg-slate-50">
                     <option value="">Semua</option>
                     <option value="Rendah">Rendah</option>
                     <option value="Menengah Rendah">Menengah Rendah</option>
@@ -199,6 +203,7 @@
                             <th class="p-4 border-r">Tingkat Risiko</th>
                             <th class="p-4 border-r">Investasi (Rp)</th>
                             <th class="p-4 border-r">Tanggal Terbit</th>
+                            <th class="p-4 border-r text-center">Status</th>
                             <th class="p-4 sticky right-0 bg-slate-50 z-10 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -228,7 +233,9 @@
 
 <td class="p-4 border-r align-middle whitespace-normal">
     <div class="line-clamp-5 text-[11px] leading-tight w-[200px] break-words">
-    {{ $item->jenis_perusahaan }}</td>
+        {{ $item->jenis_perusahaan }}
+    </div>
+</td>
 
 <td class="p-4 border-r align-middle whitespace-normal">
     <div class="line-clamp-3 text-[11px] leading-tight w-[200px] break-words">
@@ -265,6 +272,11 @@
 </td>
 
 <td class="p-4 border-r whitespace-nowrap">{{ $item->tgl_terbit }}</td>
+<td class="p-4 border-r text-center">
+    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase {{ $item->status === 'Aktif' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+        {{ $item->status ?? 'Aktif' }}
+    </span>
+</td>
                             <td class="px-6 py-4 text-center sticky right-0 bg-white z-10 border-l">
                                 <div class="flex justify-center space-x-2">
                                     <button type="button" @click='window.editData(@json($item))' class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition">
@@ -278,15 +290,26 @@
                         </tr>
                         @empty
                         <tr><td colspan="20" class="p-12 text-center text-slate-400 italic">Belum ada data.</td></tr>
+
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
+
+        <!-- Dynamic Pagination Navigation -->
+        <div id="pagination-container" class="mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-white px-6 py-4 rounded-xl border shadow-sm">
+            <div class="text-sm text-slate-500 font-medium" id="pagination-info">
+                Menampilkan <span class="font-bold text-slate-800" id="page-start">0</span> - <span class="font-bold text-slate-800" id="page-end">0</span> dari <span class="font-bold text-slate-800" id="page-total">0</span> data
+            </div>
+            <div class="flex items-center gap-2" id="pagination-buttons">
+                <!-- Page numbers rendered dynamically -->
+            </div>
+        </div>
     </main>
 
 <div x-show="openModalTambah" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4" x-cloak x-transition>
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
         <div class="bg-indigo-600 p-4 text-white flex justify-between items-center">
             <h2 class="font-bold text-lg">Tambah Pelaku Usaha Baru</h2>
             <button @click="openModalTambah = false" class="text-white text-2xl font-bold">&times;</button>
@@ -294,7 +317,7 @@
 
         <form action="{{ route('pelaku-usaha.store') }}" method="POST" class="flex-1 overflow-y-auto p-8">
             @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
                 <div class="space-y-4 bg-blue-50/50 p-4 rounded-xl border border-blue-100">
                     <h3 class="font-bold text-blue-800 text-sm uppercase italic border-b border-blue-200 pb-1">I. Identitas</h3>
                     <div>
@@ -339,13 +362,14 @@
                         <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Nama Proyek</label>
                         <input type="text" name="nama_proyek" class="w-full border rounded-lg p-2 outline-none">
                     </div>
-                    <div>
+                    <div class="relative">
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kbli</label>
-                        <input type="text" name="kbli" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <input type="text" name="kbli" id="tambah_kbli" autocomplete="off" oninput="lookupKbliTambah(this.value)" onfocus="if(this.value.length >= 2) document.getElementById('tambah_kbli_suggestions').classList.remove('hidden')" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <div id="tambah_kbli_suggestions" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-100 hidden"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Uraian Kbli</label>
-                        <input type="text" name="uraian_kbli" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <input type="text" name="uraian_kbli" readonly class="w-full border-slate-200 border rounded-lg p-2 outline-none bg-slate-50 cursor-not-allowed text-slate-500">
                     </div>
                 </div> <div class="space-y-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
                     <h3 class="font-bold text-amber-800 text-sm uppercase italic border-b border-amber-200 pb-1">III. Lokasi & Skala</h3>
@@ -412,8 +436,20 @@
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Tanggal Terbit</label>
                         <input type="date" name="tgl_terbit" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
                     </div>
+                </div> 
+
+                <div class="space-y-4 bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                    <h3 class="font-bold text-purple-800 text-sm uppercase italic border-b border-purple-200 pb-1">IV. Status Perusahaan</h3>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Status Aktif</label>
+                        <select name="status" class="w-full border rounded-lg p-2 outline-none">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Tidak Aktif">Tidak Aktif</option>
+                        </select>
                     </div>
                 </div>
+
+            </div>
             <div class="mt-8 flex justify-end gap-3 border-t pt-6">
                 <button type="button" @click="openModalTambah = false" class="px-6 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">BATAL</button>
                 <button type="submit" class="bg-indigo-600 text-white px-10 py-2 rounded-lg font-bold shadow-lg">SIMPAN DATA</button>
@@ -423,7 +459,7 @@
 </div>
 
 <div x-show="openModalEdit" class="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50 flex items-center justify-center p-4" x-cloak x-transition>
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden flex flex-col">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
         <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
             <h2 class="font-bold text-lg">Edit Pelaku Usaha</h2>
             <button @click="openModalEdit = false" class="text-white text-2xl font-bold">&times;</button>
@@ -433,7 +469,7 @@
             @csrf
             @method('PUT')
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
                 
                 <div class="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
                     <h3 class="font-bold text-slate-800 text-sm uppercase italic border-b border-slate-200 pb-1">I. Identitas</h3>
@@ -471,13 +507,14 @@
                         <label class="block text-[10px] font-bold text-gray-600 mb-1 uppercase">Nama Proyek</label>
                         <input type="text" name="nama_proyek" id="edit_nama_proyek" class="w-full border rounded-lg p-2 outline-none">
                     </div>
-                    <div>
+                    <div class="relative">
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Kbli</label>
-                        <input type="text" name="kbli" id="edit_kbli" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <input type="text" name="kbli" id="edit_kbli" autocomplete="off" oninput="lookupKbliEdit(this.value)" onfocus="if(this.value.length >= 2) document.getElementById('edit_kbli_suggestions').classList.remove('hidden')" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <div id="edit_kbli_suggestions" class="absolute left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl z-50 max-h-48 overflow-y-auto divide-y divide-slate-100 hidden"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Uraian Kbli</label>
-                        <input type="text" name="uraian_kbli" id="edit_uraian_kbli" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
+                        <input type="text" name="uraian_kbli" id="edit_uraian_kbli" readonly class="w-full border-slate-200 border rounded-lg p-2 outline-none bg-slate-50 cursor-not-allowed text-slate-500">
                     </div>
                 </div> <div class="space-y-4 bg-amber-50/50 p-4 rounded-xl border border-amber-100">
                     <h3 class="font-bold text-amber-800 text-sm uppercase italic border-b border-amber-200 pb-1">III. Lokasi & Skala</h3>
@@ -513,7 +550,21 @@
                         <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Tanggal Terbit</label>
                         <input type="date" name="tgl_terbit" id="edit_tgl_terbit" class="w-full border-slate-200 border rounded-lg p-2 outline-none">
                     </div>
-                </div> </div> <div class="mt-8 flex justify-end gap-3 border-t pt-6">
+                </div>
+
+                <div class="space-y-4 bg-purple-50/50 p-4 rounded-xl border border-purple-100">
+                    <h3 class="font-bold text-purple-800 text-sm uppercase italic border-b border-purple-200 pb-1">IV. Status Perusahaan</h3>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-500 mb-1 uppercase">Status Aktif</label>
+                        <select name="status" id="edit_status" class="w-full border rounded-lg p-2 outline-none">
+                            <option value="Aktif">Aktif</option>
+                            <option value="Tidak Aktif">Tidak Aktif</option>
+                        </select>
+                    </div>
+                </div>
+
+            </div> 
+            <div class="mt-8 flex justify-end gap-3 border-t pt-6">
                 <button type="button" @click="openModalEdit = false" class="px-6 py-2 text-slate-500 font-bold hover:bg-slate-100 rounded-lg">BATAL</button>
                 <button type="submit" class="bg-blue-600 text-white px-10 py-2 rounded-lg font-bold shadow-lg">UPDATE DATA</button>
             </div>
@@ -581,6 +632,7 @@
         fillField('edit_tingkat_risiko', item.tingkat_risiko);
         fillField('edit_skala_usaha', item.skala_usaha);
         fillField('edit_investasi', item.investasi);
+        fillField('edit_status', item.status);
         
         if (item.tgl_terbit) {
             fillField('edit_tgl_terbit', item.tgl_terbit.split(' ')[0]);
@@ -631,56 +683,181 @@
         });
     }
 
-    /* --- 4. FILTER TABLE --- */
-function filterTable() {
-    // 1. Ambil nilai input
-    const searchVal = document.getElementById("searchInput") ? document.getElementById("searchInput").value.toUpperCase() : "";
-    const kecVal = document.getElementById("filterKecamatan").value.toUpperCase();
-    const risikoVal = document.getElementById("filterRisiko").value.toUpperCase();
-    const rows = document.querySelectorAll("tbody tr");
+    /* --- 4. FILTER TABLE WITH CLIENT-SIDE PAGINATION --- */
+    let currentPage = 1;
+    const itemsPerPage = 50;
 
-    // 2. Variabel penampung statistik
-    let counter = 1;
-    let totalinvestasi = 0;
-    let totalTK = 0;
-    let nibSet = new Set();
-    let barisTampak = 0;
-
-    rows.forEach(row => {
-        // Lewati jika baris tidak memiliki sel (mencegah error)
-        if (row.cells.length < 5) return;
-
-        // 3. Definisi Indeks Kolom Berdasarkan Gambar image_9437f2.png
-        const textFull = row.innerText.toUpperCase();
-        const textKec = row.cells[13] ? row.cells[13].innerText.toUpperCase().trim() : "";
-        const textRisiko = row.cells[16] ? row.cells[16].innerText.toUpperCase().trim() : "";
-        const textNIB = row.cells[1] ? row.cells[1].innerText.trim() : "";
-
-        // 4. Logika Pencocokan
-        const matchSearch = searchVal === "" || textFull.includes(searchVal);
-        const matchKec = kecVal === "" || textKec === kecVal;
-        const matchRisiko = risikoVal === "" || textRisiko === risikoVal;
-
-        if (matchSearch && matchKec && matchRisiko) {
-            row.style.display = "";
-            
-            // Update Nomor Urut di Tabel
-            row.cells[0].innerText = counter++;
-
-            // 5. Hitung Angka (Indeks 11 = Investasi, Indeks 12 = Tenaga Kerja)
-            const invVal = parseInt(row.cells[11].innerText.replace(/[^0-9]/g, '')) || 0;
-            const tkVal = parseInt(row.cells[12].innerText.replace(/[^0-9]/g, '')) || 0;
-
-            totalinvestasi += invVal;
-            totalTK += tkVal;
-            if (textNIB) nibSet.add(textNIB);
-            barisTampak++;
-        } else {
-            row.style.display = "none";
+    function filterTable(resetPage = false) {
+        if (resetPage) {
+            currentPage = 1;
         }
-    });
 
-}
+        // 1. Ambil nilai filter
+        const searchVal = document.getElementById("searchInput") ? document.getElementById("searchInput").value.toUpperCase() : "";
+        const kecVal = document.getElementById("filterKecamatan") ? document.getElementById("filterKecamatan").value.toUpperCase() : "";
+        const risikoVal = document.getElementById("filterRisiko") ? document.getElementById("filterRisiko").value.toUpperCase() : "";
+        const rows = document.querySelectorAll("tbody tr");
+
+        // 2. Variabel kalkulasi statistik
+        let totalinvestasi = 0;
+        let totalTK = 0;
+        let nibSet = new Set();
+        let matchedRows = [];
+
+        // 3. Cari baris yang lolos filter pencarian
+        rows.forEach(row => {
+            if (row.cells.length < 5) return;
+
+            const textFull = row.innerText.toUpperCase();
+            const textKec = row.cells[13] ? row.cells[13].innerText.toUpperCase().trim() : "";
+            const textRisiko = row.cells[16] ? row.cells[16].innerText.toUpperCase().trim() : "";
+            const textNIB = row.cells[2] ? row.cells[2].innerText.trim() : ""; // NIB ada di indeks sel 2
+
+            const matchSearch = searchVal === "" || textFull.includes(searchVal);
+            const matchKec = kecVal === "" || textKec === kecVal;
+            const matchRisiko = risikoVal === "" || textRisiko === risikoVal;
+
+            if (matchSearch && matchKec && matchRisiko) {
+                // Investasi di kolom 17, Tenaga Kerja di kolom 15
+                const invVal = parseInt(row.cells[17]?.innerText.replace(/[^0-9]/g, '')) || 0;
+                const tkVal = parseInt(row.cells[15]?.innerText.replace(/[^0-9]/g, '')) || 0;
+                
+                matchedRows.push({
+                    row: row,
+                    textNIB: textNIB,
+                    invVal: invVal,
+                    tkVal: tkVal
+                });
+            } else {
+                row.style.display = "none";
+            }
+        });
+
+        const totalMatched = matchedRows.length;
+        const totalPages = Math.ceil(totalMatched / itemsPerPage) || 1;
+
+        // Validasi currentPage
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = Math.min(startIndex + itemsPerPage, totalMatched);
+
+        // 4. Update data baris & statistik keseluruhan filter
+        matchedRows.forEach((item, index) => {
+            totalinvestasi += item.invVal;
+            totalTK += item.tkVal;
+            if (item.textNIB) nibSet.add(item.textNIB);
+
+            if (index >= startIndex && index < endIndex) {
+                item.row.style.display = "";
+                item.row.cells[0].innerText = index + 1; // Nomor urut absolut
+            } else {
+                item.row.style.display = "none";
+            }
+        });
+
+        // 5. Update info pagination di DOM
+        const startElem = document.getElementById("page-start");
+        const endElem = document.getElementById("page-end");
+        const totalElem = document.getElementById("page-total");
+
+        if (startElem) startElem.innerText = totalMatched > 0 ? startIndex + 1 : 0;
+        if (endElem) endElem.innerText = endIndex;
+        if (totalElem) totalElem.innerText = totalMatched;
+
+        // 6. Update widget statistik di DOM secara real-time
+        const formatter = new Intl.NumberFormat('id-ID');
+        const statInv = document.getElementById("stat-investasi");
+        const statTK = document.getElementById("stat-tenaga-kerja");
+        const statUsaha = document.getElementById("stat-pelaku-usaha");
+        const statProyek = document.getElementById("stat-total-proyek");
+
+        if (statInv) statInv.innerText = "Rp " + formatter.format(totalinvestasi);
+        if (statTK) statTK.innerText = formatter.format(totalTK);
+        if (statUsaha) statUsaha.innerText = formatter.format(nibSet.size);
+        if (statProyek) statProyek.innerText = formatter.format(totalMatched);
+
+        // 7. Render tombol navigasi halaman
+        renderPaginationButtons(totalPages);
+    }
+
+    function renderPaginationButtons(totalPages) {
+        const btnContainer = document.getElementById("pagination-buttons");
+        if (!btnContainer) return;
+        btnContainer.innerHTML = "";
+
+        // Sembunyikan container pagination jika hanya ada 1 halaman total
+        if (totalPages <= 1) {
+            btnContainer.parentElement.style.display = "none";
+            return;
+        } else {
+            btnContainer.parentElement.style.display = "flex";
+        }
+
+        // Tombol Halaman Sebelumnya (Previous)
+        const prevBtn = document.createElement("button");
+        prevBtn.type = "button";
+        prevBtn.className = `px-3 py-2 rounded-lg border text-sm font-semibold transition ${currentPage === 1 ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50 active:scale-95'}`;
+        prevBtn.innerHTML = `
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+        `;
+        prevBtn.disabled = currentPage === 1;
+        prevBtn.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                filterTable();
+                document.querySelector('.table-container').scrollLeft = 0;
+            }
+        };
+        btnContainer.appendChild(prevBtn);
+
+        // Logic tampilan sliding window nomor halaman (maksimal 5 halaman terlihat)
+        let startPage = Math.max(1, currentPage - 2);
+        let endPage = Math.min(totalPages, startPage + 4);
+        if (endPage - startPage < 4) {
+            startPage = Math.max(1, endPage - 4);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            const pageBtn = document.createElement("button");
+            pageBtn.type = "button";
+            pageBtn.innerText = i;
+            pageBtn.className = `w-10 h-10 rounded-lg text-sm font-bold transition flex items-center justify-center ${i === currentPage ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20' : 'text-slate-700 hover:bg-slate-50 border active:scale-95'}`;
+            pageBtn.onclick = () => {
+                currentPage = i;
+                filterTable();
+                document.querySelector('.table-container').scrollLeft = 0;
+            };
+            btnContainer.appendChild(pageBtn);
+        }
+
+        // Tombol Halaman Selanjutnya (Next)
+        const nextBtn = document.createElement("button");
+        nextBtn.type = "button";
+        nextBtn.className = `px-3 py-2 rounded-lg border text-sm font-semibold transition ${currentPage === totalPages ? 'text-slate-300 border-slate-100 cursor-not-allowed' : 'text-slate-700 hover:bg-slate-50 active:scale-95'}`;
+        nextBtn.innerHTML = `
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+            </svg>
+        `;
+        nextBtn.disabled = currentPage === totalPages;
+        nextBtn.onclick = () => {
+            if (currentPage < totalPages) {
+                currentPage++;
+                filterTable();
+                document.querySelector('.table-container').scrollLeft = 0;
+            }
+        };
+        btnContainer.appendChild(nextBtn);
+    }
+
+    // Inisialisasi awal saat DOM selesai dimuat
+    document.addEventListener("DOMContentLoaded", function() {
+        filterTable();
+    });
 /* --- 5. EXPORT EXCEL LOGIC --- */
 async function exportToExcel() {
     try {
@@ -707,7 +884,8 @@ async function exportToExcel() {
             { header: 'Tenaga Kerja', key: 'tenaga_kerja', width: 15 },
             { header: 'Tingkat Risiko', key: 'tingkat_risiko', width: 15 },
             { header: 'Investasi (Rp)', key: 'investasi', width: 20 },
-            { header: 'Tanggal Terbit', key: 'tgl_terbit', width: 15 }
+            { header: 'Tanggal Terbit', key: 'tgl_terbit', width: 15 },
+            { header: 'Status', key: 'status', width: 12 }
         ];
 
         // Styling Header
@@ -742,7 +920,8 @@ async function exportToExcel() {
                         tenaga_kerja:    cells[15]?.innerText.trim() || '',
                         tingkat_risiko:  cells[16]?.innerText.trim() || '',
                         investasi:       cells[17]?.innerText.trim() || '',
-                        tgl_terbit:      cells[18]?.innerText.trim() || ''
+                        tgl_terbit:      cells[18]?.innerText.trim() || '',
+                        status:          cells[19]?.innerText.trim() || ''
                     });
                 }
             }
@@ -781,6 +960,93 @@ async function exportToExcel() {
     document.addEventListener('change', function(e) {
         if (e.target && e.target.id === 'fileInput') {
              console.log("File terpilih: " + e.target.files[0]?.name);
+        }
+    });
+
+    /* --- 8. KBLI AUTOFILL LOOKUP LOGIC --- */
+    window.lookupKbliTambah = function(val) {
+        const code = val.trim();
+        const box = document.getElementById('tambah_kbli_suggestions');
+        
+        if (code.length < 2) {
+            box.classList.add('hidden');
+            box.innerHTML = '';
+            return;
+        }
+        
+        fetch(`/api/cari-kbli?q=${code}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.length > 0) {
+                    box.classList.remove('hidden');
+                    box.innerHTML = res.map(item => `
+                        <button type="button" onclick="selectKbliTambah('${item.kode}', '${item.judul.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 hover:bg-slate-50 flex flex-col gap-0.5 transition duration-150">
+                            <span class="text-[10px] font-black text-indigo-600 font-mono">${item.kode}</span>
+                            <span class="text-[10px] font-bold text-slate-700 leading-normal">${item.judul}</span>
+                        </button>
+                    `).join('');
+                } else {
+                    box.classList.add('hidden');
+                    box.innerHTML = '';
+                }
+            })
+            .catch(err => console.error('KBLI lookup error:', err));
+    };
+
+    window.selectKbliTambah = function(kode, judul) {
+        document.getElementById('tambah_kbli').value = kode;
+        document.getElementsByName('uraian_kbli')[0].value = judul;
+        const box = document.getElementById('tambah_kbli_suggestions');
+        box.classList.add('hidden');
+        box.innerHTML = '';
+    };
+
+    window.lookupKbliEdit = function(val) {
+        const code = val.trim();
+        const box = document.getElementById('edit_kbli_suggestions');
+        
+        if (code.length < 2) {
+            box.classList.add('hidden');
+            box.innerHTML = '';
+            return;
+        }
+        
+        fetch(`/api/cari-kbli?q=${code}`)
+            .then(res => res.json())
+            .then(res => {
+                if (res && res.length > 0) {
+                    box.classList.remove('hidden');
+                    box.innerHTML = res.map(item => `
+                        <button type="button" onclick="selectKbliEdit('${item.kode}', '${item.judul.replace(/'/g, "\\'")}')" class="w-full text-left px-3 py-2 hover:bg-slate-50 flex flex-col gap-0.5 transition duration-150">
+                            <span class="text-[10px] font-black text-indigo-600 font-mono">${item.kode}</span>
+                            <span class="text-[10px] font-bold text-slate-700 leading-normal">${item.judul}</span>
+                        </button>
+                    `).join('');
+                } else {
+                    box.classList.add('hidden');
+                    box.innerHTML = '';
+                }
+            })
+            .catch(err => console.error('KBLI lookup error:', err));
+    };
+
+    window.selectKbliEdit = function(kode, judul) {
+        document.getElementById('edit_kbli').value = kode;
+        document.getElementById('edit_uraian_kbli').value = judul;
+        const box = document.getElementById('edit_kbli_suggestions');
+        box.classList.add('hidden');
+        box.innerHTML = '';
+    };
+
+    // Close dropdowns on clicking away
+    window.addEventListener('click', function(e) {
+        if (!e.target.closest('#tambah_kbli') && !e.target.closest('#tambah_kbli_suggestions')) {
+            const box = document.getElementById('tambah_kbli_suggestions');
+            if (box) box.classList.add('hidden');
+        }
+        if (!e.target.closest('#edit_kbli') && !e.target.closest('#edit_kbli_suggestions')) {
+            const box = document.getElementById('edit_kbli_suggestions');
+            if (box) box.classList.add('hidden');
         }
     });
 </script>

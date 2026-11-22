@@ -69,16 +69,31 @@
 
                 <div>
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Password</label>
-                    <input type="password" name="password" required
-                        class="w-full input-glass rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none placeholder:text-slate-600"
-                        placeholder="bolodewo44">
+                    <div class="relative">
+                        <input id="password-field" type="password" name="password" required
+                            class="w-full input-glass rounded-2xl pl-5 pr-12 py-4 text-sm font-bold text-white outline-none placeholder:text-slate-600"
+                            placeholder="bolodewo44">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-400 hover:text-white transition duration-200">
+                            <svg id="eye-icon" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="pt-2">
+                <div class="pt-2 flex flex-col gap-3">
                     <button type="submit" 
                         class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-bold text-sm shadow-xl shadow-indigo-900/20 hover:bg-indigo-500 transition duration-300 transform hover:-translate-y-1 active:scale-95 uppercase tracking-wider">
                         Masuk Ke Panel
                     </button>
+                    <a href="{{ url('/') }}" 
+                        class="w-full bg-white/5 border border-white/10 text-white hover:bg-white/10 py-4 rounded-2xl font-bold text-sm transition duration-300 text-center uppercase tracking-wider flex items-center justify-center gap-2">
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        Kembali ke Dashboard
+                    </a>
                 </div>
             </form>
         </div>
@@ -90,5 +105,26 @@
         </div>
     </div>
 
+    <script>
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('password-field');
+            const eyeIcon = document.getElementById('eye-icon');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                // Change to eye-off icon
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.814 7.814a3 3 0 01-4.243-4.243m1.895-1.895L17.5 17.5m-3.65-3.65l-3.65-3.65m0 0a3 3 0 014.243-4.243m-4.242 4.242L3 21" />
+                `;
+            } else {
+                passwordField.type = 'password';
+                // Change to eye icon
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                `;
+            }
+        }
+    </script>
 </body>
 </html>
