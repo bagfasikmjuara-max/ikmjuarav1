@@ -1089,7 +1089,8 @@ CREATE TABLE public.statistik_kecamatan (
     email_dinas character varying(255) DEFAULT 'disnaker@madiunkota.go.id'::character varying,
     fonnte_token character varying(255),
     admin_wa_number character varying(255),
-    wa_notif_active boolean DEFAULT true NOT NULL
+    wa_notif_active boolean DEFAULT true NOT NULL,
+    kunjungan_tahun_lalu bigint DEFAULT 0 NOT NULL
 );
 
 

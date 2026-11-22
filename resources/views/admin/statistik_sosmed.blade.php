@@ -168,6 +168,26 @@
                 </div>
             </div>
 
+            <!-- Tombol Simpan Cepat Khusus Bagian Statistik -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-gradient-to-r from-emerald-50 via-teal-50 to-indigo-50 border-2 border-emerald-200/80 rounded-3xl mb-8 shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-xl shadow-md shadow-emerald-500/25">
+                        ⚡
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">Simpan Pembaruan Statistik</h4>
+                        <p class="text-xs text-slate-500">Klik tombol ini untuk langsung menyimpan data statistik. Nilai di Halaman Landing utama akan otomatis langsung terupdate.</p>
+                    </div>
+                </div>
+                <button type="submit" 
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-black text-sm shadow-lg shadow-emerald-600/20 hover:scale-[1.02] active:scale-95 transition-all cursor-pointer shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>SIMPAN PERUBAHAN STATISTIK</span>
+                </button>
+            </div>
+
             <!-- Grid Kontak Dinas (2 fields) -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div class="space-y-4">

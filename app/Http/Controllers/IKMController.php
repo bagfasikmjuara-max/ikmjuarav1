@@ -102,6 +102,14 @@ class IKMController extends Controller
         $terakhirUpdateManual = $latestUpdate ? $latestUpdate->updated_at : now();
 
         // Ambil statistik website dari baris pertama statistik_kecamatan
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('statistik_kecamatan', 'kunjungan_tahun_lalu')) {
+                \Illuminate\Support\Facades\Schema::table('statistik_kecamatan', function ($table) {
+                    $table->bigInteger('kunjungan_tahun_lalu')->default(0)->nullable();
+                });
+            }
+        } catch (\Throwable $e) {}
+
         $firstRow = DB::table('statistik_kecamatan')->first();
         $ikmTerdaftar = $firstRow->ikm_terdaftar ?? 560;
 
@@ -192,6 +200,14 @@ class IKMController extends Controller
 
     public function updateStatistikSosmed(Request $request)
     {
+        try {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('statistik_kecamatan', 'kunjungan_tahun_lalu')) {
+                \Illuminate\Support\Facades\Schema::table('statistik_kecamatan', function ($table) {
+                    $table->bigInteger('kunjungan_tahun_lalu')->default(0)->nullable();
+                });
+            }
+        } catch (\Throwable $e) {}
+
         try {
             $hariIni = (int)$request->input('kunjungan_hari_ini', 0);
             $bulanIni = (int)$request->input('kunjungan_bulan_ini', 0);
