@@ -59,6 +59,7 @@ Route::get('/migrasi-db-hosting', function () {
 
         $sql = file_get_contents($path);
         \Illuminate\Support\Facades\DB::unprepared($sql);
+        \Illuminate\Support\Facades\DB::statement("SET search_path TO public, pg_catalog;");
 
         $totalIkm = \Illuminate\Support\Facades\DB::table('pelaku_usaha')->count();
         $stats = \Illuminate\Support\Facades\DB::table('statistik_kecamatan')->get();
