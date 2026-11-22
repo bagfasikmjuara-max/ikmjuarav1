@@ -28,6 +28,55 @@ use App\Http\Controllers\DashboardIkmJuaraController;
 | AUTHENTICATION & BYPASS
 |--------------------------------------------------------------------------
 */
+// Jalur Cepat Setup Database Hosting
+Route::get('/migrasi-db-hosting', function () {
+    try {
+        @set_time_limit(300);
+        @ini_set('memory_limit', '512M');
+
+        $candidatePaths = [
+            base_path('ikm_juara_db_postgres_ready_hosting.sql'),
+            public_path('ikm_juara_db_postgres_ready_hosting.sql'),
+            '/home/vbittrgt/public_html/ikm_juara_db_postgres_ready_hosting.sql',
+            '/home/vbittrgt/repositories/ikmjuarav1/ikm_juara_db_postgres_ready_hosting.sql',
+        ];
+
+        $path = null;
+        foreach ($candidatePaths as $p) {
+            if (file_exists($p)) {
+                $path = $p;
+                break;
+            }
+        }
+
+        if (!$path) {
+            return response()->json([
+                'status' => 'error', 
+                'message' => 'File SQL tidak ditemukan di server.',
+                'checked_paths' => $candidatePaths
+            ], 404);
+        }
+
+        $sql = file_get_contents($path);
+        \Illuminate\Support\Facades\DB::unprepared($sql);
+
+        $totalIkm = \Illuminate\Support\Facades\DB::table('pelaku_usaha')->count();
+        $stats = \Illuminate\Support\Facades\DB::table('statistik_kecamatan')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Database PostgreSQL hosting berhasil disinkronkan 100%!',
+            'total_pelaku_usaha' => $totalIkm,
+            'statistik' => $stats
+        ]);
+    } catch (\Throwable $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ], 500);
+    }
+});
+
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
