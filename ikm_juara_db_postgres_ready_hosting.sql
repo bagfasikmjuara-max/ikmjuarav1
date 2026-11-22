@@ -145,8 +145,6 @@ DROP TABLE IF EXISTS public.cache_locks;
 DROP TABLE IF EXISTS public.cache;
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
-
 --
 -- Name: cache; Type: TABLE; Schema: public; Owner: -
 --
